@@ -1,4 +1,10 @@
+import ConnectWallet from "./molecules/ConnectWallet";
+import { displayBalance } from "./utils";
+import { useAccountStore } from "./store";
+
 function App() {
+  const { account } = useAccountStore();
+
   return (
     <div className="p-10 md:p-20 xl:p-30 w-full lg:w-2/3 xl:w-1/2 m-auto">
       <div className="space-y-8">
@@ -20,12 +26,29 @@ function App() {
             , répandre çà et là)
           </p>
         </div>
-        <button
-          type="submit"
-          className="text-black italic px-3 py-1 border-none bg-primary shadow-button"
-        >
-          connect wallet
-        </button>
+        <div className="space-y-2">
+          <h2 className="text-2xl italic">connect to wallet</h2>
+          <ConnectWallet />
+        </div>
+        {!!account && (
+          <>
+            <div className="space-y-2">
+              <h2 className="text-2xl italic">send gnot</h2>
+              <p>you have {displayBalance(+account.coins.split("ugnot")[0])}</p>
+            </div>
+            <div className="space-y-4">
+              <h2 className="text-2xl italic">recipients and amounts</h2>
+              <p>
+                enter one address and amount in GNOT on each line. supports any
+                format.
+              </p>
+              <textarea
+                className="w-full h-32 p-2 border text-primary bg-secondary border-primary"
+                placeholder="0x1234=100"
+              />
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
