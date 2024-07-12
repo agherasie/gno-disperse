@@ -4,6 +4,7 @@ import (
 	"std"
 
 	"gno.land/p/demo/ufmt"
+	"gno.land/p/demo/grc/grc20"
 )
 
 // DisperseGnot parses receivers and amounts and sends out gnot
@@ -45,6 +46,37 @@ func DisperseGnot(addresses []std.Address, coins std.Coins) {
 			banker.SendCoins(realmAddr, caller, send)
 		}
 	}
+}
+
+func DisperseToken(token grc20.Token, addresses []std.Address, coins std.Coins) {
+	caller := std.GetOrigCaller() // get tx sender
+
+	var totalAmount uint64
+	for _, coin := range coins {
+		totalAmount += uint64(coin.Amount)
+	}
+
+	token.TransferFrom(caller, std.CurrentRealm().Addr(), totalAmount)
+	for i, address := range addresses {
+		for y, coin := range coins {
+			if y == i {
+				token.Transfer(address, uint64(coin.Amount))
+			}
+		}
+	}
+}
+
+func Test() {
+	reza := std.Address("g143f6s0wygzkzjt4jylnn5zc7sxy0cjckxlh7xq")
+	alex := std.Address("g142ecm5hhnjurxrs0vm39pla6cjvfzqywn6d4wz")
+	foo := grc20.NewBanker("Foo", "FOO", 4)
+	foo.Mint(std.GetOrigCaller(), 1000000*10000) // @administrator (1M)
+	token := foo.Token()
+	ufmt.Println("moi lenny = ", token.BalanceOf(std.GetOrigCaller()))
+	DisperseToken(token, []std.Address{reza, alex}, std.Coins{{foo.GetName(), 1000}, {foo.GetName(), 1000}})
+	ufmt.Println("moi lenny after = ", token.BalanceOf(std.GetOrigCaller()))
+	ufmt.Println("reza = ", token.BalanceOf(reza))
+	ufmt.Println("alex = ", token.BalanceOf(alex))
 }
 
 func DisperseGnotString(addresses string, amounts string) {
