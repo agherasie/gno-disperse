@@ -2,36 +2,60 @@ import { FC } from "react";
 import { displayBalance } from "../utils";
 import { useAccountStore } from "../store";
 import { useForm } from "react-hook-form";
-// import { AdenaService } from "../services/adena/adena";
-// import { EMessageType } from "../services/adena/adena.types";
-// import { constants } from "../constants";
+import { constants } from "../constants";
+import { AdenaService } from "../services/adena/adena";
+import { EMessageType } from "../services/adena/adena.types";
 
 const SendForm: FC = () => {
-  const { account } = useAccountStore();
+  const { account, setAccount } = useAccountStore();
 
   const {
-    register,
+    reset,
     handleSubmit,
+    setError,
+    register,
     formState: { errors },
   } = useForm<{ submission: string }>();
+
   if (!account) return null;
+
   const onSubmit = handleSubmit(async (data) => {
-    console.log(data);
-    // await AdenaService.sendTransaction(
-    //   [
-    //     {
-    //       type: EMessageType.MSG_CALL,
-    //       value: {
-    //         caller: account.address,
-    //         send: "",
-    //         pkg_path: constants.realmPath,
-    //         func: "XXXXX",
-    //         args: null,
-    //       },
-    //     },
-    //   ],
-    //   5000000
-    // );
+    const addresses = [];
+    const amounts = [];
+
+    const lines = data.submission.split("\n");
+    for (const line of lines) {
+      const [address, amount] = line.split("=");
+      addresses.push(address);
+      amounts.push(amount);
+    }
+
+    AdenaService.sendTransaction(
+      [
+        {
+          type: EMessageType.MSG_CALL,
+          value: {
+            caller: account.address,
+            send: `${amounts.reduce((a, b) => +a + +b, 0)}ugnot`,
+            pkg_path: constants.realmPath,
+            func: "DisperseGnotString",
+            args: [addresses.toString(), amounts.toString()],
+          },
+        },
+      ],
+      5000000
+    )
+      .catch(() =>
+        setError("submission", {
+          type: "manual",
+          message: "error sending transaction",
+        })
+      )
+      .then((res) => {
+        if (!res) return;
+        reset();
+        AdenaService.getAccountInfo().then((res) => setAccount(res));
+      });
   });
 
   return (
@@ -48,8 +72,11 @@ const SendForm: FC = () => {
         </p>
         <form className="space-y-4" onSubmit={onSubmit}>
           <div className="space-y-0">
-            {errors.submission && (
+            {errors.submission?.type === "required" && (
               <p className="text-red-500">this field is required</p>
+            )}
+            {errors.submission?.type === "manual" && (
+              <p className="text-red-500">{errors.submission.message}</p>
             )}
             <textarea
               className={`w-full h-32 p-2 border text-primary bg-secondary outline-none ${
