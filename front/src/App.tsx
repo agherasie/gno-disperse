@@ -1,9 +1,19 @@
 import ConnectWallet from "./molecules/ConnectWallet";
-import { useAccountStore } from "./store";
+import { useAccountStore, useProviderStore } from "./store";
 import SendForm from "./molecules/SendForm";
+import SendType from "./molecules/SendType";
+import { GnoWSProvider } from "@gnolang/gno-js-client";
+import { useEffect } from "react";
+import { constants } from "./constants";
 
 function App() {
   const { account } = useAccountStore();
+
+  const { setProvider } = useProviderStore();
+  useEffect(() => {
+    const provider = new GnoWSProvider(constants.chainRPC);
+    setProvider(provider);
+  }, [setProvider]);
 
   return (
     <div className="p-10 md:p-20 xl:p-30 w-full lg:w-2/3 xl:w-1/2 m-auto">
@@ -30,7 +40,12 @@ function App() {
           <h2 className="text-2xl italic">connect to wallet</h2>
           <ConnectWallet />
         </div>
-        {!!account && <SendForm />}
+        {!!account && (
+          <>
+            <SendType />
+            <SendForm />
+          </>
+        )}
       </div>
     </div>
   );
