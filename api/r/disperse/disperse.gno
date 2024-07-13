@@ -66,19 +66,6 @@ func DisperseToken(token grc20.Token, addresses []std.Address, coins std.Coins) 
 	}
 }
 
-func Test() {
-	reza := std.Address("g143f6s0wygzkzjt4jylnn5zc7sxy0cjckxlh7xq")
-	alex := std.Address("g142ecm5hhnjurxrs0vm39pla6cjvfzqywn6d4wz")
-	foo := grc20.NewBanker("Foo", "FOO", 4)
-	foo.Mint(std.GetOrigCaller(), 1000000*10000) // @administrator (1M)
-	token := foo.Token()
-	ufmt.Println("moi lenny = ", token.BalanceOf(std.GetOrigCaller()))
-	DisperseToken(token, []std.Address{reza, alex}, std.Coins{{foo.GetName(), 1000}, {foo.GetName(), 1000}})
-	ufmt.Println("moi lenny after = ", token.BalanceOf(std.GetOrigCaller()))
-	ufmt.Println("reza = ", token.BalanceOf(reza))
-	ufmt.Println("alex = ", token.BalanceOf(alex))
-}
-
 func DisperseGnotString(addresses string, amounts string) {
 	parsedAddresses, err := parseAddresses(addresses)
 	if err != nil {
