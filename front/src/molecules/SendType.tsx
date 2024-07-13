@@ -18,35 +18,28 @@ const SendType: FC = () => {
     register,
     setError,
     formState: { errors },
-  } = useForm<{ tokenAddress: string }>();
+  } = useForm<{ symbol: string }>();
 
   const onSubmit = handleSubmit(async (data) => {
     const tokenBalance = await provider
       ?.evaluateExpression(
-        data.tokenAddress,
-        `BalanceOf("${account?.address}")`
+        "gno.land/r/demo/grc20factory",
+        `BalanceOf("${data.symbol}", "${account?.address}")`
       )
       .then((res) => +res.split(" ")[0].slice(1))
-      .catch(() => {
-        setError("tokenAddress", {
+      .catch((e) => {
+        console.log(e);
+        setError("symbol", {
           type: "manual",
           message: "invalid address",
         });
         setToken(null);
       });
-    const tokenName = await provider
-      ?.evaluateExpression(data.tokenAddress, `GetName()`)
-      .then((res) => res.split('"')[1]);
-    const tokenSymbol = await provider
-      ?.evaluateExpression(data.tokenAddress, `GetSymbol()`)
-      .then((res) => res.split('"')[1]);
 
     if (!tokenBalance) return;
 
     setToken({
-      address: data.tokenAddress,
-      name: tokenName!,
-      symbol: tokenSymbol!,
+      symbol: data.symbol,
       balance: tokenBalance,
     });
   });
@@ -79,14 +72,13 @@ const SendType: FC = () => {
       {sendType === SendEnum.TOKEN && (
         <div className="space-y-4">
           <form onSubmit={onSubmit} className="space-y-2">
-            <h2 className="text-2xl italic">token address</h2>
+            <h2 className="text-2xl italic">token symbol</h2>
             <div className="flex flex-row space-x-4">
               <input
-                {...register("tokenAddress")}
-                placeholder="gno.land/r/demo/foo20"
+                {...register("symbol")}
+                placeholder="TEST"
                 className={`w-full p-2 border text-primary bg-secondary outline-none ${
-                  errors.tokenAddress &&
-                  "border-red-500 placeholder:text-red-500"
+                  errors.symbol && "border-red-500 placeholder:text-red-500"
                 }`}
               />
               <button
@@ -96,15 +88,12 @@ const SendType: FC = () => {
                 load
               </button>
             </div>
-            {errors.tokenAddress?.type === "manual" && (
-              <p className="text-red-500">{errors.tokenAddress.message}</p>
+            {errors.symbol?.type === "manual" && (
+              <p className="text-red-500">{errors.symbol.message}</p>
             )}
           </form>
           {token?.balance && (
-            <p>
-              you have {displayCoin(token?.balance ?? 0, token?.symbol)} (
-              {token?.name})
-            </p>
+            <p>you have {displayCoin(token?.balance ?? 0, token?.symbol)}</p>
           )}
         </div>
       )}

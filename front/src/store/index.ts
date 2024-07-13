@@ -6,17 +6,10 @@ import { IAccountInfo } from "../services/adena/adena.types";
 const useAccountStore = create<{
   account: IAccountInfo | null;
   setAccount: (address: IAccountInfo | null) => void;
-}>()(
-  persist(
-    (set) => ({
-      account: null,
-      setAccount: (account) => set({ account }),
-    }),
-    {
-      name: "account-storage",
-    }
-  )
-);
+}>((set) => ({
+  account: null,
+  setAccount: (account) => set({ account }),
+}));
 
 const useProviderStore = create<{
   provider: GnoWSProvider | null;
@@ -39,8 +32,6 @@ export enum SendEnum {
 }
 
 type Token = {
-  address: string;
-  name: string;
   symbol: string;
   balance: number;
 };

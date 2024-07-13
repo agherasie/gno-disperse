@@ -4,7 +4,7 @@ import (
 	"std"
 
 	"gno.land/p/demo/ufmt"
-	"gno.land/p/demo/grc/grc20"
+	tokens "gno.land/r/demo/grc20factory"
 )
 
 // DisperseGnot parses receivers and amounts and sends out gnot
@@ -48,7 +48,7 @@ func DisperseGnot(addresses []std.Address, coins std.Coins) {
 	}
 }
 
-func DisperseToken(token grc20.Token, addresses []std.Address, coins std.Coins) {
+func DisperseToken(addresses []std.Address, coins std.Coins) {
 	caller := std.GetOrigCaller() // get tx sender
 
 	var totalAmount uint64
@@ -56,14 +56,33 @@ func DisperseToken(token grc20.Token, addresses []std.Address, coins std.Coins) 
 		totalAmount += uint64(coin.Amount)
 	}
 
-	token.TransferFrom(caller, std.CurrentRealm().Addr(), totalAmount)
+	tokens.TransferFrom(coins[0].Denom, caller, std.CurrentRealm().Addr(), totalAmount)
 	for i, address := range addresses {
 		for y, coin := range coins {
 			if y == i {
-				token.Transfer(address, uint64(coin.Amount))
+				tokens.Transfer(coin.Denom, address, uint64(coin.Amount))
 			}
 		}
 	}
+}
+
+func DisperseTokenString(symbol string, addresses string, amounts string) {
+	parsedAddresses, err := parseAddresses(addresses)
+	if err != nil {
+		panic(err)
+	}
+
+	parsedAmounts, err := parseAmounts(amounts)
+	if err != nil {
+		panic(err)
+	}
+
+	coins := make(std.Coins, len(parsedAmounts))
+	for i, amount := range parsedAmounts {
+		coins[i] = std.Coin{symbol, amount}
+	}
+
+	DisperseToken(parsedAddresses, coins)
 }
 
 func DisperseGnotString(addresses string, amounts string) {

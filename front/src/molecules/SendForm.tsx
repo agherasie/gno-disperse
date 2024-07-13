@@ -7,7 +7,7 @@ import { useForm } from "react-hook-form";
 
 const SendForm: FC = () => {
   const { account, setAccount } = useAccountStore();
-  const { token, sendType } = useTokenStore();
+  const { token, sendType, setToken } = useTokenStore();
 
   const {
     reset,
@@ -30,16 +30,33 @@ const SendForm: FC = () => {
       amounts.push(amount);
     }
 
+    const { send, func, args } =
+      sendType === SendEnum.TOKEN
+        ? {
+            send: "",
+            func: "DisperseTokenString",
+            args: [
+              token?.symbol as string,
+              addresses.toString(),
+              amounts.toString(),
+            ],
+          }
+        : {
+            send: `${amounts.reduce((a, b) => +a + +b, 0)}ugnot`,
+            func: "DisperseGnotString",
+            args: [addresses.toString(), amounts.toString()],
+          };
+
     AdenaService.sendTransaction(
       [
         {
           type: EMessageType.MSG_CALL,
           value: {
             caller: account.address,
-            send: `${amounts.reduce((a, b) => +a + +b, 0)}ugnot`,
             pkg_path: constants.realmPath,
-            func: "DisperseGnotString",
-            args: [addresses.toString(), amounts.toString()],
+            send,
+            func,
+            args,
           },
         },
       ],
@@ -55,6 +72,7 @@ const SendForm: FC = () => {
         if (!res) return;
         reset();
         AdenaService.getAccountInfo().then((res) => setAccount(res));
+        setToken(null);
       });
   });
 
