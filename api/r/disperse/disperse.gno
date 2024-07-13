@@ -4,6 +4,7 @@ import (
 	"std"
 
 	"gno.land/p/demo/ufmt"
+	"gno.land/p/demo/grc/grc20"
 )
 
 // DisperseGnot parses receivers and amounts and sends out gnot
@@ -43,6 +44,24 @@ func DisperseGnot(addresses []std.Address, coins std.Coins) {
 		if leftoverAmt > 0 {
 			send := std.Coins{{coin.Denom, leftoverAmt}}
 			banker.SendCoins(realmAddr, caller, send)
+		}
+	}
+}
+
+func DisperseToken(token grc20.Token, addresses []std.Address, coins std.Coins) {
+	caller := std.GetOrigCaller() // get tx sender
+
+	var totalAmount uint64
+	for _, coin := range coins {
+		totalAmount += uint64(coin.Amount)
+	}
+
+	token.TransferFrom(caller, std.CurrentRealm().Addr(), totalAmount)
+	for i, address := range addresses {
+		for y, coin := range coins {
+			if y == i {
+				token.Transfer(address, uint64(coin.Amount))
+			}
 		}
 	}
 }
