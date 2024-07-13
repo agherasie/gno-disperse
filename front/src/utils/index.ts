@@ -1,11 +1,11 @@
 export const displayBalance = (ugnot: number) => {
   const gnot = ugnot / 1000000;
-  return displayGnot(gnot);
+  return displayCoin(gnot, "GNOT");
 };
 
-export const displayGnot = (gnot: number) => {
-  return `${gnot.toLocaleString("en-US", {
+export const displayCoin = (amount: number, symbol: string = "???") => {
+  return `${amount.toLocaleString("en-US", {
     style: "currency",
     currency: "USD",
-  })} GNOT`;
+  })} ${symbol}`;
 };
