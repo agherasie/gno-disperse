@@ -36,10 +36,15 @@ const DisperseForm: FC = () => {
   const parseSubmission = (submission: string) => {
     if (submission.length === 0 || !submission.match(SUBMISSION_FORMAT)) return;
     const lines = submission.split("\n");
-    return lines.map((line) => {
-      const [address, amount] = line.split("=");
-      return { address, amount: +amount };
-    });
+    return lines
+      .filter((line) => {
+        const [address, amount] = line.split("=");
+        return !!address && !!amount;
+      })
+      .map((line) => {
+        const [address, amount] = line.split("=");
+        return { address, amount: +amount };
+      });
   };
 
   useEffect(() => {
