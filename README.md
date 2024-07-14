@@ -40,15 +40,17 @@ gnokey maketx call -pkgpath "gno.land/r/demo/disperse" -func "DisperseGnotString
 
 Before using the token disperse functionality, you must first grant an allowance to the `r/demo/disperse` contract so that it can use your funds.
 
+![alt text](assets/image-3.png)
+
+or, if you're using `gnokey`,
+
 ```sh
 gnokey maketx call -pkgpath "gno.land/r/demo/grc20factory" -func "Approve" -gas-fee 1000000ugnot -gas-wanted 2000000 -send "" -broadcast -chainid "dev" -args "TEST" -args "g1yryw6qs8h9anvguu4dfdc0u7zh4gvv8vqf59sj" -args "200" -remote "tcp://127.0.0.1:26657" MyKey
 ```
 
-Once you have granted `disperse` the allowance, you can proceed with the web app by filling the form
+---
 
-![alt text](assets/image-1.png)
-
-Or you can run the following command using gnokey :
+Once you have granted `disperse` the allowance, you can proceed by clicking the "disperse token" button or you can run the following command using gnokey :
 
 ```sh
 gnokey maketx call -pkgpath "gno.land/r/demo/disperse" -func "DisperseTokenString" -gas-fee 1000000ugnot -gas-wanted 2000000 -send "" -broadcast -chainid "dev" -args "TEST" -args "g1dmt3sa5ucvecxuhf3j6ne5r0e3z4x7h6c03xc0,g1akeqsvhucjt8gf5yupyzjxsjd29wv8fayng37c" -args "100,100" -remote "tcp://127.0.0.1:26657" MyKey
