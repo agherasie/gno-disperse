@@ -98,7 +98,10 @@ const SendType: FC = () => {
         </div>
       )}
       {sendType === SendEnum.GNOT && (
-        <p>you have {displayBalance(+account!.coins.split("ugnot")[0])}</p>
+        <p>
+          you have{" "}
+          {displayBalance(+account!.coins.split("ugnot")[0] / 1_000_000)}
+        </p>
       )}
     </div>
   );
