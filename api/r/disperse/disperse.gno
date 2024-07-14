@@ -12,6 +12,13 @@ func DisperseGnot(addresses []std.Address, coins std.Coins) {
 	coinSent := std.GetOrigSend() // get Coins sent with call
 	caller := std.GetOrigCaller() // get tx sender
 
+	// Get address of Disperse realm
+	realmAddr := std.CurrentRealm().Addr()
+
+	// Get Banker
+	banker := std.GetBanker(std.BankerTypeOrigSend)
+
+	leftoverAmt := banker.GetCoins(realmAddr).AmountOf("ugnot")
 	if len(addresses) != len(coins) {
 		panic(errNumAddrValMismatch)
 	}
@@ -21,17 +28,10 @@ func DisperseGnot(addresses []std.Address, coins std.Coins) {
 		totalAmount += coin.Amount
 	}
  
-	// Check if total amount of coins sent is equal to total amount of coins to be sent
-	if totalAmount != coinSent.AmountOf("ugnot") {
-		ufmt.Println(totalAmount, coinSent.AmountOf("ugnot")) 
+	// Check if total amount of coins sent is bigger or equal to total amount of coins to be sent
+	if totalAmount > coinSent.AmountOf("ugnot") {
 		panic(ErrWrongAmount)
 	}
-
-	// Get address of Disperse realm
-	realmAddr := std.CurrentRealm().Addr()
-
-	// Get Banker
-	banker := std.GetBanker(std.BankerTypeOrigSend)
 
 	// Send coins
 	for i, _ := range addresses {
