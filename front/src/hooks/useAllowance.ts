@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useCallback, useEffect } from "react";
 import { constants } from "../constants";
 import { AdenaService } from "../services/adena/adena";
 import { EMessageType } from "../services/adena/adena.types";
@@ -6,10 +6,9 @@ import { useAccountStore, useProviderStore, useTokenStore } from "../store";
 
 const useAllowance = () => {
   const { provider } = useProviderStore();
-  const { token } = useTokenStore();
+  const { token, setAllowance } = useTokenStore();
   const { account } = useAccountStore();
 
-  const [allowance, setAllowance] = useState<number>(0);
   const refreshAllowance = useCallback(
     () =>
       provider
@@ -18,7 +17,7 @@ const useAllowance = () => {
           `Allowance("${token?.symbol}", "${account?.address}", "${constants.realmAddress}")`
         )
         .then((res) => setAllowance(+res.split(" ")[0].slice(1))),
-    [account?.address, provider, token?.symbol]
+    [account?.address, provider, setAllowance, token?.symbol]
   );
 
   const handleApprove = useCallback(
@@ -49,11 +48,11 @@ const useAllowance = () => {
   );
 
   useEffect(() => {
+    if (!token?.symbol) return;
     refreshAllowance();
   }, [account?.address, provider, refreshAllowance, token?.symbol]);
 
   return {
-    allowance,
     onApprove: handleApprove,
   };
 };

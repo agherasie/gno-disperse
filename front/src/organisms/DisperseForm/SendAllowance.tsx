@@ -1,8 +1,9 @@
 import { FC } from "react";
-import useAllowance from "../hooks/useAllowance";
+import useAllowance from "../../hooks/useAllowance";
 import { useFormContext } from "react-hook-form";
-import { DisperseForm } from "./SendForm";
-import Button from "./Button";
+import Button from "../../molecules/Button";
+import { DisperseForm } from "./type";
+import { useTokenStore } from "../../store";
 
 interface SendAllowanceProps {
   totalAmount: number;
@@ -12,7 +13,8 @@ const SendAllowance: FC<SendAllowanceProps> = ({
   totalAmount,
   accountBalance,
 }) => {
-  const { allowance, onApprove } = useAllowance();
+  const { allowance } = useTokenStore();
+  const { onApprove } = useAllowance();
 
   const {
     formState: { errors },

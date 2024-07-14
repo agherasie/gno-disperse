@@ -8,7 +8,7 @@ import {
 } from "../store";
 import { useForm } from "react-hook-form";
 
-const SendType: FC = () => {
+const DisperseTypeSelect: FC = () => {
   const { account } = useAccountStore();
   const { token, setToken, setSendType, sendType } = useTokenStore();
   const { provider } = useProviderStore();
@@ -27,8 +27,7 @@ const SendType: FC = () => {
         `BalanceOf("${data.symbol}", "${account?.address}")`
       )
       .then((res) => +res.split(" ")[0].slice(1))
-      .catch((e) => {
-        console.log(e);
+      .catch(() => {
         setError("symbol", {
           type: "manual",
           message: "invalid address",
@@ -107,4 +106,4 @@ const SendType: FC = () => {
   );
 };
 
-export default SendType;
+export default DisperseTypeSelect;

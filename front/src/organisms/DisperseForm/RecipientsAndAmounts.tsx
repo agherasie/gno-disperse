@@ -1,7 +1,7 @@
 import { FC } from "react";
 import { useFormContext } from "react-hook-form";
-import { useTokenStore } from "../store";
-import { DisperseForm } from "./SendForm";
+import { useTokenStore } from "../../store";
+import { DisperseForm } from "./type";
 
 const RecipientsAndAmounts: FC = () => {
   const { token } = useTokenStore();
@@ -15,7 +15,6 @@ const RecipientsAndAmounts: FC = () => {
       <h2 className="text-2xl italic">recipients and amounts</h2>
       <p>
         enter one address and amount in {token?.symbol ?? "GNOT"} on each line.
-        supports any format.
       </p>
       <div className="space-y-0">
         {errors.submission?.type === "required" && (

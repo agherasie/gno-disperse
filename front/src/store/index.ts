@@ -41,6 +41,8 @@ const useTokenStore = create<{
   setToken: (token: Token | null) => void;
   sendType: SendEnum;
   setSendType: (sendType: SendEnum) => void;
+  allowance: number;
+  setAllowance: (allowance: number) => void;
 }>((set) => ({
   token: null,
   setToken: (token) => set({ token }),
@@ -48,6 +50,8 @@ const useTokenStore = create<{
     set((state) => ({ token: { ...state.token!, balance } })),
   sendType: SendEnum.GNOT,
   setSendType: (sendType) => set({ sendType }),
+  allowance: 0,
+  setAllowance: (allowance) => set({ allowance }),
 }));
 
 export { useAccountStore, useProviderStore, useTokenStore };

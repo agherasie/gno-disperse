@@ -4,16 +4,18 @@ interface ButtonProps {
   isDisabled: boolean;
   onClick?: () => void;
   helperText?: string;
-  type: "button" | "submit";
+  type?: "button" | "submit";
 }
 const Button: FC<PropsWithChildren<ButtonProps>> = ({
   isDisabled,
   onClick,
+  type = "button",
   helperText,
   children,
 }) => (
   <div className="flex flex-row space-x-6 items-center">
     <button
+      type={type}
       onClick={onClick}
       disabled={isDisabled}
       className={`text-black italic p-2 border-none bg-primary shadow-button ${

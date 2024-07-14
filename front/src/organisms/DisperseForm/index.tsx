@@ -4,24 +4,22 @@ import {
   useAccountStore,
   useProviderStore,
   useTokenStore,
-} from "../store";
-import { constants } from "../constants";
-import { AdenaService } from "../services/adena/adena";
-import { EMessageType } from "../services/adena/adena.types";
+} from "../../store";
+import { constants } from "../../constants";
+import { AdenaService } from "../../services/adena/adena";
+import { EMessageType } from "../../services/adena/adena.types";
 import { FormProvider, useForm } from "react-hook-form";
-import useAllowance from "../hooks/useAllowance";
-import SendAllowance from "./SendAllowance";
-import RecipientsAndAmounts from "./RecipientsAndAmounts";
+import Button from "../../molecules/Button";
 import RecapTable from "./RecapTable";
-import Button from "./Button";
+import RecipientsAndAmounts from "./RecipientsAndAmounts";
+import SendAllowance from "./SendAllowance";
 
 const SUBMISSION_FORMAT = /g1[a-z0-9]+=[0-9]+|\${[a-zA-Z0-9_]+}=[a-zA-Z0-9_]+/g;
 type SubmissionType = { address: string; amount: number };
-export type DisperseForm = { submission: string };
 
-const SendForm: FC = () => {
+const DisperseForm: FC = () => {
   const { account, setAccount } = useAccountStore();
-  const { token, sendType, setToken } = useTokenStore();
+  const { token, sendType, setToken, allowance } = useTokenStore();
   const { provider } = useProviderStore();
 
   const methods = useForm<{ submission: string }>({
@@ -61,8 +59,6 @@ const SendForm: FC = () => {
     () => parsedSubmission.map((v) => v.amount).reduce((a, b) => +a + +b, 0),
     [parsedSubmission]
   );
-
-  const { allowance } = useAllowance();
 
   const disabledSend = useMemo(
     () =>
@@ -184,4 +180,4 @@ const SendForm: FC = () => {
   );
 };
 
-export default SendForm;
+export default DisperseForm;

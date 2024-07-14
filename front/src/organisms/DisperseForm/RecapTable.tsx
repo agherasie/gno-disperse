@@ -1,7 +1,7 @@
 import { FC } from "react";
-import { SendEnum, useTokenStore } from "../store";
-import { displayCoin, displayBalance } from "../utils";
-import ListItem from "./ListItem";
+import { SendEnum, useTokenStore } from "../../store";
+import { displayCoin, displayBalance } from "../../utils";
+import ListItem from "../../molecules/ListItem";
 
 export interface RecapTableProps {
   parsedSubmission: { address: string; amount: number }[];
