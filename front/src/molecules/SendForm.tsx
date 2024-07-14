@@ -1,4 +1,4 @@
-import { FC, useCallback, useEffect, useMemo, useState } from "react";
+import { FC, useEffect, useMemo, useState } from "react";
 import {
   SendEnum,
   useAccountStore,
@@ -8,25 +8,26 @@ import {
 import { constants } from "../constants";
 import { AdenaService } from "../services/adena/adena";
 import { EMessageType } from "../services/adena/adena.types";
-import { useForm } from "react-hook-form";
-import { displayBalance, displayCoin } from "../utils";
+import { FormProvider, useForm } from "react-hook-form";
+import useAllowance from "../hooks/useAllowance";
+import SendAllowance from "./SendAllowance";
+import RecipientsAndAmounts from "./RecipientsAndAmounts";
+import RecapTable from "./RecapTable";
+import Button from "./Button";
 
 const SUBMISSION_FORMAT = /g1[a-z0-9]+=[0-9]+|\${[a-zA-Z0-9_]+}=[a-zA-Z0-9_]+/g;
 type SubmissionType = { address: string; amount: number };
+export type DisperseForm = { submission: string };
 
 const SendForm: FC = () => {
   const { account, setAccount } = useAccountStore();
   const { token, sendType, setToken } = useTokenStore();
   const { provider } = useProviderStore();
 
-  const {
-    reset,
-    handleSubmit,
-    setError,
-    register,
-    watch,
-    formState: { errors },
-  } = useForm<{ submission: string }>({ defaultValues: { submission: "" } });
+  const methods = useForm<{ submission: string }>({
+    defaultValues: { submission: "" },
+  });
+  const { reset, handleSubmit, setError, watch } = methods;
 
   const [parsedSubmission, setParsedSubmission] = useState<SubmissionType[]>(
     []
@@ -61,45 +62,7 @@ const SendForm: FC = () => {
     [parsedSubmission]
   );
 
-  const [allowance, setAllowance] = useState<number>(0);
-  const refreshAllowance = useCallback(
-    () =>
-      provider
-        ?.evaluateExpression(
-          "gno.land/r/demo/grc20factory",
-          `Allowance("${token?.symbol}", "${account?.address}", "${constants.realmAddress}")`
-        )
-        .then((res) => setAllowance(+res.split(" ")[0].slice(1))),
-    [account?.address, provider, token?.symbol]
-  );
-
-  const handleApprove = useCallback(() => {
-    if (token === null || account === null) return;
-
-    AdenaService.sendTransaction(
-      [
-        {
-          type: EMessageType.MSG_CALL,
-          value: {
-            caller: account.address,
-            pkg_path: "gno.land/r/demo/grc20factory",
-            send: "",
-            func: "Approve",
-            args: [
-              token.symbol,
-              constants.realmAddress,
-              totalAmount.toString(),
-            ],
-          },
-        },
-      ],
-      5000000
-    ).then(() => refreshAllowance());
-  }, [account, refreshAllowance, token, totalAmount]);
-
-  useEffect(() => {
-    refreshAllowance();
-  }, [account?.address, provider, refreshAllowance, token?.symbol]);
+  const { allowance } = useAllowance();
 
   const disabledSend = useMemo(
     () =>
@@ -107,8 +70,6 @@ const SendForm: FC = () => {
       (sendType === SendEnum.TOKEN && allowance === 0),
     [accountBalance, allowance, sendType, totalAmount]
   );
-
-  if (!account) return null;
 
   const onSubmit = handleSubmit(async (data) => {
     const addresses = parseSubmission(data.submission)?.map((v) => v.address);
@@ -156,7 +117,7 @@ const SendForm: FC = () => {
         {
           type: EMessageType.MSG_CALL,
           value: {
-            caller: account.address,
+            caller: account!.address,
             pkg_path: constants.realmPath,
             send,
             func,
@@ -181,142 +142,44 @@ const SendForm: FC = () => {
       });
   });
 
-  if (sendType === SendEnum.TOKEN && token === null) return null;
+  if ((sendType === SendEnum.TOKEN && token === null) || !account) return null;
 
   return (
     <form className="space-y-4" onSubmit={onSubmit}>
-      <div className="space-y-16 w-full">
-        <div className="space-y-4 w-full">
-          <h2 className="text-2xl italic">recipients and amounts</h2>
-          <p>
-            enter one address and amount in {token?.symbol ?? "GNOT"} on each
-            line. supports any format.
-          </p>
-          <div className="space-y-0">
-            {errors.submission?.type === "required" && (
-              <p className="text-red-500">this field is required</p>
-            )}
-            {errors.submission?.type === "manual" && (
-              <p className="text-red-500">{errors.submission.message}</p>
-            )}
-            <textarea
-              className={`w-full h-32 p-2 border text-primary bg-secondary outline-none ${
-                errors.submission
-                  ? "border-red-500 placeholder:text-red-500"
-                  : "border-primary"
-              }`}
-              placeholder="g1dmt3sa5ucvecxuhf3j6ne5r0e3z4x7h6c03xc0=100"
-              {...register("submission", { required: true })}
-            />
-          </div>
-        </div>
-        {parsedSubmission.length > 0 && (
-          <div className="space-y-4 w-full italic">
-            <h2 className="text-2xl italic">confirm</h2>
-            <ul className="space-y-2 text-lg">
-              <li>
-                <div className="flex flex-row justify-between">
-                  <i>address</i>
-                  <i>amount</i>
-                </div>
-              </li>
-              {parsedSubmission.map(({ address, amount }, i) => (
-                <li key={i}>
-                  <div className="flex flex-row justify-between">
-                    <p className="not-italic">{address}</p>
-                    <div className="w-full border-t-white border-t mt-3 mx-4" />
-                    <p className="whitespace-nowrap">
-                      {displayCoin(+amount, token?.symbol ?? "GNOT")}
-                    </p>
-                  </div>
-                </li>
-              ))}
-              <li>
-                <div className="flex flex-row justify-between">
-                  <i>total</i>
-                  <p>
-                    {displayCoin(
-                      parsedSubmission
-                        .map((v) => v.amount)
-                        .reduce((a, b) => +a + +b, 0),
-                      token?.symbol ?? "GNOT"
-                    )}
-                  </p>
-                </div>
-              </li>
-              <li>
-                <div className="flex flex-row justify-between">
-                  <i>your balance</i>
-                  <p>
-                    {sendType === SendEnum.GNOT
-                      ? displayBalance(accountBalance)
-                      : displayCoin(accountBalance, token?.symbol)}
-                  </p>
-                </div>
-              </li>
-              <li>
-                <div
-                  className={`flex flex-row justify-between ${
-                    accountBalance < totalAmount && "text-red-500"
-                  }`}
-                >
-                  <i>remaining</i>
-                  <p>
-                    {sendType === SendEnum.GNOT
-                      ? displayBalance(accountBalance - totalAmount)
-                      : displayCoin(
-                          accountBalance - totalAmount,
-                          token?.symbol
-                        )}
-                  </p>
-                </div>
-              </li>
-            </ul>
-
-            {sendType === SendEnum.TOKEN && (
-              <div className="space-y-2">
-                <h2 className="text-2xl italic">allowance</h2>
-                <p>allow realm to transfer tokens on your behalf</p>
-                <div className="flex flex-row space-x-6 items-center">
-                  <button
-                    disabled={allowance >= totalAmount}
-                    type="button"
-                    onClick={handleApprove}
-                    className={`text-black italic p-2 border-none bg-primary shadow-button ${
-                      allowance >= totalAmount &&
-                      "cursor-not-allowed opacity-90 text-opacity-30"
-                    }`}
-                  >
-                    {allowance >= totalAmount ? "approved" : "approve"}
-                  </button>
-                  {!!errors.root && (
-                    <p className="text-red-500">{errors.root?.message}</p>
-                  )}
-                </div>
-              </div>
-            )}
-            <div className="flex flex-row space-x-6 items-center">
-              <button
-                disabled={disabledSend}
-                className={`text-black italic p-2 border-none bg-primary shadow-button ${
-                  disabledSend &&
-                  "cursor-not-allowed opacity-90 text-opacity-30"
-                }`}
+      <FormProvider {...methods}>
+        <div className="space-y-16 w-full">
+          <RecipientsAndAmounts />
+          {parsedSubmission.length > 0 && (
+            <div className="space-y-4 w-full italic">
+              <h2 className="text-2xl italic">confirm</h2>
+              <RecapTable
+                accountBalance={accountBalance}
+                parsedSubmission={parsedSubmission}
+                totalAmount={totalAmount}
+              />
+              {sendType === SendEnum.TOKEN && (
+                <SendAllowance
+                  totalAmount={totalAmount}
+                  accountBalance={accountBalance}
+                />
+              )}
+              <Button
                 type="submit"
+                isDisabled={disabledSend}
+                helperText={
+                  disabledSend
+                    ? sendType === SendEnum.TOKEN && allowance === 0
+                      ? "needs allowance"
+                      : "total exceeds balance"
+                    : undefined
+                }
               >
                 disperse {sendType === SendEnum.TOKEN ? "token" : "gnot"}
-              </button>
-              {disabledSend && (
-                <i>
-                  {sendType === SendEnum.TOKEN && allowance === 0
-                    ? "needs allowance"
-                    : "total exceeds balance"}
-                </i>
-              )}
+              </Button>
             </div>
-          </div>
-        )}
-      </div>
+          )}
+        </div>
+      </FormProvider>
     </form>
   );
 };
