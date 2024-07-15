@@ -2,8 +2,7 @@ package disperse
 
 import (
 	"std"
-
-	"gno.land/p/demo/ufmt"
+ 
 	tokens "gno.land/r/demo/grc20factory"
 )
 
@@ -17,11 +16,6 @@ func DisperseGnot(addresses []std.Address, coins std.Coins) {
 
 	// Get Banker
 	banker := std.GetBanker(std.BankerTypeOrigSend)
-
-	leftoverAmt := banker.GetCoins(realmAddr).AmountOf("ugnot")
-	if len(addresses) != len(coins) {
-		panic(errNumAddrValMismatch)
-	}
 
 	var totalAmount int64
 	for _, coin := range coins {
