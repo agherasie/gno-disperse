@@ -1,4 +1,4 @@
-import { GnoWSProvider } from "@gnolang/gno-js-client";
+import { GnoJSONRPCProvider } from "@gnolang/gno-js-client";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { IAccountInfo } from "../services/adena/adena.types";
@@ -12,13 +12,13 @@ const useAccountStore = create<{
 }));
 
 const useProviderStore = create<{
-  provider: GnoWSProvider | null;
-  setProvider: (provider: GnoWSProvider) => void;
+  provider: GnoJSONRPCProvider | null;
+  setProvider: (provider: GnoJSONRPCProvider) => void;
 }>()(
   persist(
     (set) => ({
       provider: null,
-      setProvider: (provider: GnoWSProvider) => set({ provider }),
+      setProvider: (provider: GnoJSONRPCProvider) => set({ provider }),
     }),
     {
       name: "provider-storage",
