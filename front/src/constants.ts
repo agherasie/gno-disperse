@@ -5,12 +5,19 @@ const vars = {
   VITE_CHAIN_RPC: import.meta.env.VITE_CHAIN_RPC,
   VITE_REALM_PATH: import.meta.env.VITE_REALM_PATH,
   VITE_REALM_ADDRESS: import.meta.env.VITE_REALM_ADDRESS,
+  VITE_GNOLAND_URL: import.meta.env.VITE_GNOLAND_URL,
 };
 
 const env = from(vars, {});
 
 export const constants = {
   chainID: env.get("VITE_CHAIN_ID").default("test4").asString(),
+  gnolandURL: env
+    .get("VITE_GNOLAND_URL")
+    .default(
+      "https://test4.gno.land/r/g1w62226g8hykfmtuasvz80rdf0jl6phgxsphh5v/testing/disperse?help"
+    )
+    .asString(),
   chainRPC: env
     .get("VITE_CHAIN_RPC")
     .default("https://rpc.test4.gno.land")

@@ -1,5 +1,6 @@
 import { FC } from "react";
 import ConnectWallet from "../molecules/ConnectWallet";
+import { constants } from "../constants";
 
 const DisperseHeader: FC = () => (
   <div className="space-y-8 w-full">
@@ -12,7 +13,7 @@ const DisperseHeader: FC = () => (
             <p className="text-lg">testnet</p>
           </div>
         </div>
-        <a href="https://gno.land/demo/r/disperse" className="underline">
+        <a href={constants.gnolandURL} className="underline">
           gno.land
         </a>
       </div>
