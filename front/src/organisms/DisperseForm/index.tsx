@@ -74,7 +74,9 @@ const DisperseForm: FC = () => {
 
   const onSubmit = handleSubmit(async (data) => {
     const addresses = parseSubmission(data.submission)?.map((v) => v.address);
-    const amounts = parseSubmission(data.submission)?.map((v) => v.amount);
+    const amounts = parseSubmission(data.submission)?.map(
+      (v) => v.amount * 1_000_000
+    );
 
     if (!addresses || !amounts) {
       setError("submission", {
@@ -128,12 +130,13 @@ const DisperseForm: FC = () => {
       ],
       5000000
     )
-      .catch(() =>
+      .catch((e) => {
+        console.error(e);
         setError("submission", {
           type: "manual",
           message: "error sending transaction",
-        })
-      )
+        });
+      })
       .then((res) => {
         if (!res) return;
         reset();
