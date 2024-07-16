@@ -31,13 +31,12 @@ const RecapTable: FC<RecapTableProps> = ({
         </ListItem>
       ))}
       <ListItem>
+        <i>gas fees</i>
+        <p>{displayCoin(1, "GNOT")}</p>
+      </ListItem>
+      <ListItem>
         <i>total</i>
-        <p>
-          {displayCoin(
-            parsedSubmission.map((v) => v.amount).reduce((a, b) => +a + +b, 0),
-            token?.symbol ?? "GNOT"
-          )}
-        </p>
+        <p>{displayCoin(totalAmount, token?.symbol ?? "GNOT")}</p>
       </ListItem>
       <ListItem>
         <i>your balance</i>

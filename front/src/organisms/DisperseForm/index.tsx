@@ -61,7 +61,8 @@ const DisperseForm: FC = () => {
   );
 
   const totalAmount = useMemo<number>(
-    () => parsedSubmission.map((v) => v.amount).reduce((a, b) => +a + +b, 0),
+    () =>
+      parsedSubmission.map((v) => v.amount).reduce((a, b) => +a + +b, 0) + 1,
     [parsedSubmission]
   );
 
